@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractBaseUser
 
 PUBLISH_OPTIONS = (
     ('private', 'This photo is private'),
@@ -7,12 +7,17 @@ PUBLISH_OPTIONS = (
     ('shared', 'This photo is viewable by shared users'))
 
 
-class Imagr_User(models.Model):
-    user = models.OneToOneField(User)
+class Imagr_User(AbstractBaseUser):
+    
     active = models.BooleanField(default=True)
-    id = models.AutoField(primary_key=True)
-    # following stuff
+    following = models.ManyToManyField('self', symmetrical = False)
 
+    #following.symmetrical = False
+    username = models.CharField(max_length=40, unique = True)
+
+class Follower(models.Model):
+    from_imagr_user_id = models.ForeignKey(Imagr_User)
+    to_imagr_user_id = models.ForeignKey(Imagr_User)
 
 # Create your models here.
 class Photo(models.Model):
@@ -22,7 +27,6 @@ class Photo(models.Model):
     date_published = models.DateTimeField('Date Published')
     title = models.CharField(max_length=60)
     published = models.CharField(PUBLISH_OPTIONS, max_length=7, default='private')
-    id = models.AutoField(primary_key=True)
 
     def __str__(self):
         return '{} : {}'.format(title, date_modified)
@@ -36,7 +40,5 @@ class Album(models.Model):
     title = models.CharField(max_length=60)
     published = models.CharField(PUBLISH_OPTIONS, max_length=7, default='private')
     cover = models.ForeignKey(Photo)
-    id = models.AutoField(primary_key=True)
-
 
 

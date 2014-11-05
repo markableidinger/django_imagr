@@ -2,13 +2,12 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-from django.conf import settings
+import django.utils.timezone
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
@@ -30,10 +29,13 @@ class Migration(migrations.Migration):
             name='Imagr_User',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('active', models.BooleanField()),
-                ('user', models.OneToOneField(to=settings.AUTH_USER_MODEL)),
+                ('password', models.CharField(max_length=128, verbose_name='password')),
+                ('last_login', models.DateTimeField(default=django.utils.timezone.now, verbose_name='last login')),
+                ('active', models.BooleanField(default=True)),
+                ('USERNAME_FIELD', models.CharField(unique=True, max_length=40)),
             ],
             options={
+                'abstract': False,
             },
             bases=(models.Model,),
         ),

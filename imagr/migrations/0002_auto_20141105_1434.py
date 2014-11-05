@@ -11,10 +11,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
+        migrations.RenameField(
             model_name='imagr_user',
-            name='active',
-            field=models.BooleanField(default=True),
-            preserve_default=True,
+            old_name='USERNAME_FIELD',
+            new_name='identifier',
         ),
     ]
