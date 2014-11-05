@@ -36,6 +36,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'imagr'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -59,7 +60,11 @@ WSGI_APPLICATION = 'imagr_site.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': 'imagr_db',
+        'USER': 'admin',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',
+        'PORT': '55432',
     }
 }
 
@@ -68,7 +73,7 @@ DATABASES = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC-8'
+TIME_ZONE = 'US/Pacific'
 
 USE_I18N = True
 
