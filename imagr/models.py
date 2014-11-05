@@ -14,10 +14,11 @@ class Imagr_User(AbstractBaseUser):
 
     #following.symmetrical = False
     username = models.CharField(max_length=40, unique = True)
+    USERNAME_FIELD = 'username'
 
-class Follower(models.Model):
-    from_imagr_user_id = models.ForeignKey(Imagr_User)
-    to_imagr_user_id = models.ForeignKey(Imagr_User)
+# class Follower(models.Model):
+#     from_imagr_user_id = models.ForeignKey(Imagr_User)
+#     to_imagr_user_id = models.ForeignKey(Imagr_User)
 
 # Create your models here.
 class Photo(models.Model):
