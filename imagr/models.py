@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
+import datetime
 
 PUBLISH_OPTIONS = (
     ('private', 'This photo is private'),
@@ -8,10 +9,9 @@ PUBLISH_OPTIONS = (
 
 
 class Imagr_User(AbstractBaseUser):
-    
+    date_joined = models.DateTimeField('Date Joined', auto_now_add=True)
     active = models.BooleanField(default=True)
     following = models.ManyToManyField('self', symmetrical = False)
-
     #following.symmetrical = False
     username = models.CharField(max_length=40, unique = True)
     USERNAME_FIELD = 'username'
@@ -40,6 +40,6 @@ class Album(models.Model):
     date_published = models.DateTimeField('Date Published')
     title = models.CharField(max_length=60)
     published = models.CharField(PUBLISH_OPTIONS, max_length=7, default='private')
-    cover = models.ForeignKey(Photo)
-
+    cover = models.ForeignKey(Photo, related_name = 'cover')
+    photos = models.ManyToManyField(Photo)
 
