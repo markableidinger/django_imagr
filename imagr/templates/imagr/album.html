@@ -1,5 +1,5 @@
 <ul>
 {% for photo in photos %}
-    <li>{{photo.title}}</li>
+    <a href = '{% url "imagr:photo" photo.id %}'><li>{{photo.title}}</li></a>
 {% endfor %}
 </ul>

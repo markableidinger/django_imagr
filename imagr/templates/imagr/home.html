@@ -2,7 +2,7 @@
 {% if album_list %}
     <ul>
     {% for album in album_list %}
-        <li>{{album.title}}</li>
+        <a href= '{% url "imagr:album" album.id %}'><li>{{album.title}}</li>
     {% endfor %}
     </ul>
 {% else %}
