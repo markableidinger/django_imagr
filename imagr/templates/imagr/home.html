@@ -1,0 +1,10 @@
+<h1>This is home</h1>
+{% if album_list %}
+    <ul>
+    {% for album in album_list %}
+        <li>{{album.title}}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No albums</p>
+{% endif %}
