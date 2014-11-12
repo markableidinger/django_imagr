@@ -1,29 +1,62 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 PUBLISH_OPTIONS = (
     ('private', 'This photo is private'),
     ('public', 'This photo is publicly viewable'),
     ('shared', 'This photo is viewable by shared users'))
 
+class Imagr_User_Manager(BaseUserManager):
+    def create_user(self, email, password, username):
+        if not username:
+            raise ValueError('Must provide a username')
+        if not email:
+            raise ValueError('Must provide an email')
+        user = self.model(
+            email = self.normalize_email(email),
+            username = username
+            )
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, password, username):
+        if not username:
+            raise ValueError('Must provide a username')
+        # if not email:
+        #     raise ValueError('Must provide an email')
+        user = self.model(
+            # email = self.normalize_email(email),
+            username=username
+            )
+        user.is_admin = True
+        user.is_staff = True
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
 
 class Imagr_User(AbstractBaseUser):
     date_joined = models.DateTimeField('Date Joined', auto_now_add=True)
-    active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
     following = models.ManyToManyField('self', symmetrical = False, blank=True, null=True)
     following.required = False
-    #following.symmetrical = False
+    email = models.EmailField()
     username = models.CharField(max_length=40, unique = True)
     USERNAME_FIELD = 'username'
+    is_staff = models.BooleanField(default=False)
+    objects = Imagr_User_Manager()
 
     def __str__(self):
         return self.username
-# class Follower(models.Model):
-#     from_imagr_user_id = models.ForeignKey(Imagr_User)
-#     to_imagr_user_id = models.ForeignKey(Imagr_User)
+    def get_short_name(self, name):
+        return self.username
+    def get_full_name(self, name):
+        return self.username
+    def has_perm(self, name):
+        return True
+    def has_module_perms(self, name):
+        return True
 
-
-# Create your models here.
 class Photo(models.Model):
     owner = models.ForeignKey(Imagr_User)
     date_uploaded = models.DateTimeField('Date Uploaded')
@@ -48,4 +81,5 @@ class Album(models.Model):
 
     def __str__(self):
         return '{} : {}'.format(self.title, self.date_modified)
+
 
