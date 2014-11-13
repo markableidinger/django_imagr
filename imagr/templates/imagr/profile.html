@@ -1,4 +1,9 @@
 <h1>This is home</h1>
+<form action="{% url 'imagr:profile' user.id %}" method="post">
+{% csrf_token %}
+{{form}}
+<input type="submit" value="Create Album" />
+</form>
 {% if album_list %}
     <ul>
     {% for album in album_list %}
@@ -8,3 +13,5 @@
 {% else %}
     <p>No albums</p>
 {% endif %}
+
+{{user.username}}

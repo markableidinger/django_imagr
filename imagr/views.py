@@ -4,7 +4,7 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.template import RequestContext, loader
 from django.utils import timezone
 from imagr.models import Imagr_User, Photo, Album
-from forms import UploadFileForm
+from forms import UploadFileForm, CreateAlbumForm
 import boto
 from boto.s3.key import Key
 
@@ -13,14 +13,37 @@ def front(request):
     context = RequestContext(request, {})
     return HttpResponse(template.render(context))
 
+def profile_redirect(request):
+    logged_in_user = request.user
+    return HttpResponseRedirect('/imagr/profile/{}'.format(logged_in_user.id))
 
-def home(request):
-    album_list = Album.objects.all()
-    template = loader.get_template('imagr/home.html')
-    context = RequestContext(request, {
-        'album_list': album_list
-    })
-    return HttpResponse(template.render(context))
+def profile(request, user_id):
+    logged_in_user = request.user
+    if request.method == 'POST':
+        form = CreateAlbumForm(request.POST)
+        if form.is_valid():
+            albuminfo = form.cleaned_data
+            title = albuminfo['title']
+            published = albuminfo['published']
+            date_published = timezone.now()
+            date_uploaded = timezone.now()
+            date_modified = timezone.now()
+            owner_id = logged_in_user.id
+            new_album = Album(title=title, published=published, date_modified=date_modified,
+                date_published=date_published, date_uploaded=date_uploaded, owner_id=owner_id)
+            new_album.save()
+            return HttpResponseRedirect('/imagr/profile/{}'.format(logged_in_user.id))
+    else:
+        logged_in_user = request.user
+        album_list = Album.objects.filter(owner_id = logged_in_user.id)
+        # album_list = [album for album in album_list if album.id == logged_in_user.id]
+        template = loader.get_template('imagr/profile.html')
+        context = RequestContext(request, {
+            'album_list': album_list,
+            'user': logged_in_user,
+            'form': CreateAlbumForm
+        })
+        return HttpResponse(template.render(context))
 
 
 def album(request, album_id):
@@ -70,13 +93,26 @@ def handle_uploaded_file(f, id):
     k.set_contents_from_file(f)
 
 def photo(request, photo_id):
+    conn = boto.connect_s3
+    bucket = conn.get_bucket('imagrphotostorage')
+    k = Key(bucket)
+    k.key = photo_id
+    picture = k.get_file()
     photo = Photo.objects.get(pk=photo_id)
     template = loader.get_template('imagr/photo.html')
     context = RequestContext(request, {
-        'photo': photo
+        'photo': photo,
+        'picture': picture
     })
     return HttpResponse(template.render(context))
+"""
+take the picture from get_file() and find meta data related to content type 
+and content length.
+create a new url associated with the image like photo/image/1
+and a view. but it does not need to have a template. 
+build a response object and return
 
+"""
 
 def stream(request):
     recent_photos = Photo.objects.order_by('date_published')[:10]

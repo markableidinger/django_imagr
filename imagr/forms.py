@@ -10,3 +10,7 @@ class UploadFileForm(forms.Form):
 	title = forms.CharField(max_length=60)
 	published = forms.ChoiceField(PUBLISH_OPTIONS)
 	file = forms.FileField()
+
+class CreateAlbumForm(forms.Form):
+	title = forms.CharField(max_length=60)
+	published = forms.ChoiceField(PUBLISH_OPTIONS)

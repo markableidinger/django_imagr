@@ -10,9 +10,17 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import mailgun
+mailgun.set_mailgun_credentials()
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+EMAIL_HOST_USER = os.environ['Default SMTP Login']
+EMAIL_HOST_PASSWORD = os.environ['Default Password']
 
+EMAIL_HOST = 'smtp.mailgun.org'
+EMAIL_PORT = 25
+EMAIL_SMTP = True
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
@@ -21,7 +29,7 @@ SECRET_KEY = 'keh%rh77fe=)netnf$fx48*2(-+!d0e0)+afl=bzfb32$=r&nz'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+LOGIN_REDIRECT_URL = '/imagr/profile'
 TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
