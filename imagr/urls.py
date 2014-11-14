@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 
-from imagr.views import profile, front, stream, album, photo, profile_redirect
+from imagr.views import profile, front, stream, album, photo, profile_redirect, photo_redirect, follow
 
 urlpatterns = patterns('',
     url(r'^$', front, name='front'),
@@ -8,5 +8,7 @@ urlpatterns = patterns('',
     url(r'^stream/$', stream, name='stream'),
     url(r'^album/(?P<album_id>\d+)/$', album, name='album'),
     url(r'^photo/(?P<photo_id>\d+)/$', photo, name='photo'),
-    url(r'^profile/$', profile_redirect, name='profile_redirect')
+    url(r'^profile/$', profile_redirect, name='profile_redirect'),
+    url(r'^photo/image/(?P<photo_id>\d+)/$', photo_redirect, name='photo_redirect'),
+    url(r'^profile/follow/(?P<user_id>\d+)/$', follow, name='follow'),
 )
