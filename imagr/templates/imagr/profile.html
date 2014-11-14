@@ -7,11 +7,16 @@
 {% if album_list %}
     <ul>
     {% for album in album_list %}
-        <a href= '{% url "imagr:album" album.id %}'><li>{{album.title}}</li>
+        <a href= '{% url "imagr:album" album.id %}'><li>{{album.title}}</li></a>
     {% endfor %}
     </ul>
 {% else %}
     <p>No albums</p>
 {% endif %}
 
-{{user.username}}
+<form action="{% url 'imagr:follow' user.id %}" method="post">
+    {% csrf_token %}
+    {{followform}}
+    <input type="submit" value="Follow" />
+</form>
+

@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 """
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+import django
 import os
 import mailgun
 mailgun.set_mailgun_credentials()
@@ -70,10 +71,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'imagr_db',
-        'USER': 'admin',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
-        'PORT': '55432',
+        # 'USER': 'admin',
+        # 'PASSWORD': 'password',
+        # 'HOST': 'localhost',
+        # 'PORT': '55432',
     }
 }
 
