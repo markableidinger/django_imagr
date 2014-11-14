@@ -1,5 +1,22 @@
+{% load staticfiles %}
+<head>
+    <style>
+.stream-image {
+    max-width: 400px;
+    max-height: 400px;
+}
+
+.cover-image {
+    max-width: 200px;
+    max-height: 200px;
+}
+</style>
+</head>
 <ul>
-{% for picture in recent_photos %}
-<li>{{picture.title}}</li>
+{% for picture in picturelist %}
+<li>
+{{picture.title}} uploaded on {{picture.date_published}}<br />
+<img class='stream-image' src='{% url "imagr:photo_redirect" picture.id %}'></li>
 {% endfor %}
+{{logged_in_user.username}}
 </ul>

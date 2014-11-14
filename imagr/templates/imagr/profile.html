@@ -1,22 +1,38 @@
-<h1>This is home</h1>
-<form action="{% url 'imagr:profile' user.id %}" method="post">
+<head>    <style>
+.stream-image {
+    max-width: 400px;
+    max-height: 400px;
+}
+
+.cover-image {
+    max-width: 200px;
+    max-height: 200px;
+}
+</style>
+</head>
+<h1>This is {{page_owner.username}}'s profile</h1>
+
+{% if page_owner.id == user.id %}
+<form action="{% url 'imagr:make_album' user.id %}" method="post">
 {% csrf_token %}
 {{form}}
 <input type="submit" value="Create Album" />
 </form>
+{% endif %}
 {% if album_list %}
     <ul>
     {% for album in album_list %}
-        <a href= '{% url "imagr:album" album.id %}'><li>{{album.title}}</li></a>
+        <a href= '{% url "imagr:album" album.id %}'><li>{{album.title}}</li><img class='cover-image' src='{% url "imagr:photo_redirect" album.cover.id %}'></a>
     {% endfor %}
     </ul>
 {% else %}
     <p>No albums</p>
 {% endif %}
 
+{% if page_owner.id == user.id %}
 <form action="{% url 'imagr:follow' user.id %}" method="post">
     {% csrf_token %}
     {{followform}}
     <input type="submit" value="Follow" />
 </form>
-
+{% endif %}

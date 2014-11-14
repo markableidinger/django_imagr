@@ -1,10 +1,13 @@
 <ul>
 {% for photo in photos %}
-    <a href = '{% url "imagr:photo" photo.id %}'><li>{{photo.title}}</li></a>
+    <a href = '{% url "imagr:photo" photo.id %}'><li>{{photo.title}}</li></a> 
+    <a href = '{% url "imagr:set_cover" album.id photo.id%}'>Set as cover</a>
 {% endfor %}
+{% if logged_in_user.id == album_owner.id %}
 <form action="{% url 'imagr:album' album.id %}" method="post" enctype="multipart/form-data">
 {% csrf_token %}
 {{form}}
 <input type="submit" value="Upload Photo" />
 </form>
+{% endif %}
 </ul>
