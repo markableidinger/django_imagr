@@ -8,6 +8,7 @@ from forms import UploadFileForm, CreateAlbumForm, FollowerForm
 import boto
 import re
 from boto.s3.key import Key
+from django.db.models import Q
 
 def front(request):
     template = loader.get_template('imagr/front.html')
@@ -18,7 +19,7 @@ def profile_redirect(request):
     logged_in_user = request.user
     return HttpResponseRedirect('/imagr/profile/{}'.format(logged_in_user.id))
 
-def profile(request, user_id):
+def make_album(request, user_id):
     logged_in_user = request.user
     if request.method == 'POST':
         form = CreateAlbumForm(request.POST)
@@ -35,19 +36,23 @@ def profile(request, user_id):
             new_album.save()
             return HttpResponseRedirect('/imagr/profile/{}'.format(logged_in_user.id))
         else:
-            return HttpResponse('bad news')
+            return HttpResponse("Sorry, we couldn't process your request")
     else:
-        logged_in_user = request.user
-        album_list = Album.objects.filter(owner_id = logged_in_user.id)
-        # album_list = [album for album in album_list if album.id == logged_in_user.id]
-        template = loader.get_template('imagr/profile.html')
-        context = RequestContext(request, {
-            'album_list': album_list,
-            'user': logged_in_user,
-            'form': CreateAlbumForm,
-            'followform': FollowerForm
-        })
-        return HttpResponse(template.render(context))
+        return HttpResponse('Access Denied')
+
+def profile(request, user_id):
+    logged_in_user = request.user
+    album_list = Album.objects.filter(owner_id = user_id)
+    # album_list = [album for album in album_list if album.id == logged_in_user.id]
+    template = loader.get_template('imagr/profile.html')
+    context = RequestContext(request, {
+        'album_list': album_list,
+        'user': logged_in_user,
+        'page_owner': Imagr_User.objects.get(pk=user_id),
+        'form': CreateAlbumForm,
+        'followform': FollowerForm
+    })
+    return HttpResponse(template.render(context))
 
 
 def album(request, album_id):
@@ -61,7 +66,7 @@ def album(request, album_id):
             date_published = timezone.now()
             date_uploaded = timezone.now()
             date_modified = timezone.now()
-            owner_id = 1
+            owner_id = request.user.id
             new_photo = Photo(title=title, published=published, date_published=date_published,\
             date_modified=date_modified, date_uploaded=date_uploaded, owner_id=owner_id)
             new_photo.save()
@@ -80,10 +85,14 @@ def album(request, album_id):
             raise Http404
         photos = album.photos.all()
         template = loader.get_template('imagr/album.html')
+        logged_in_user = request.user
+        album_owner = Imagr_User.objects.get(pk=(album.owner.id))
         context = RequestContext(request, {
             'album': album,
             'photos': photos,
-            'form': UploadFileForm
+            'form': UploadFileForm,
+            'logged_in_user': logged_in_user,
+            'album_owner': album_owner
         })
         return HttpResponse(template.render(context))
 
@@ -91,11 +100,11 @@ def handle_uploaded_file(f, id):
     # url = 'http://imagrphotostorage.s3-website-us-west-2.amazonaws.com/'
     conn = boto.connect_s3()
     name, extension = str(f).split('.')
-    bucket = conn.get_bucket('imagrbucket')
+    bucket = conn.get_bucket('imagrphotostorage')
     bucket_location = bucket.get_location()
     if bucket_location:
         conn = boto.s3.connect_to_region(bucket_location)
-        bucket = conn.get_bucket('imagrbucket')
+        bucket = conn.get_bucket('imagrphotostorage')
     k = Key(bucket)
     k.key = id
     content_type = 'image/' + extension
@@ -108,50 +117,100 @@ def photo(request, photo_id):
     context = RequestContext(request, {
         'photo': photo,
     })
-    return HttpResponse(template.render(context))
+    if photo.published == 'private' and photo.owner.id != request.user.id:
+        return HttpResponse('You do not have access to this content')
+    elif photo.published == 'shared':
+        viewer = request.user
+        owner = photo.owner
+        if photo.owner == request.user:
+            return HttpResponse(template.render(context))
+        try:
+            user_confirm = viewer.following.get(id=owner.id)
+            other_user_confirm = owner.following.get(id=viewer.id)
+            return HttpResponse(template.render(context))
+        except:
+            return HttpResponse('You must follow this user first')
+    else:
+        return HttpResponse(template.render(context))
 
 def photo_redirect(request, photo_id):
     conn = boto.connect_s3()
-    bucket = conn.get_bucket('imagrbucket')
+    bucket = conn.get_bucket('imagrphotostorage')
     k = Key(bucket)
     k.key = photo_id
     picture = k.get_contents_as_string()
-    photo = Photo.objects.get(pk=photo_id)
     file_type = k.get_metadata('Content-Type')
     response = HttpResponse(picture, content_type=file_type)
     return response
 
 def follow(request, user_id):
-    if request.method == 'POST':
-        form = FollowerForm(request.POST)
-        following_user = Imagr_User.objects.get(id=user_id)
-        if form.is_valid():
-            data = form.cleaned_data
-            followed = data['username']
-            try:
-                followed_user = Imagr_User.objects.get(username=followed)
-                if followed_user.id in following_user.following:
-                    pass
-                else:
-                    following_user.following.add(followed_user)
-                return HttpResponseRedirect('/imagr/profile/{}'.format(followed_user.id))
-            except:
-                return HttpResponseRedirect('/imagr/profile/{}'.format(user_id))
+    print request.user
+    print request.user.id
+    print user_id
+    if str(request.user.id) == str(user_id):
+        if request.method == 'POST':
+            form = FollowerForm(request.POST)
+            following_user = Imagr_User.objects.get(id=user_id)
+            is_valid = form.is_valid()
+            print is_valid
+            if is_valid:
+                data = form.cleaned_data
+                followed = data['username']
+                print followed
+                try:
+                    followed_user = Imagr_User.objects.get(username=followed)
+                    print followed_user
+                    print type(following_user)
 
-"""
-take the picture from get_file() and find meta data related to content type 
-and content length.
-create a new url associated with the image like photo/image/1
-and a view. but it does not need to have a template. 
-build a response object and return
-
-"""
+                    try:
+                        confirm_user = following_user.following.get(username=followed_user.username) 
+                        print "following relation exists, found :", confirm_user
+                    except:
+                        print "adding to following list"
+                        following_user.following.add(followed_user.id)
+                    return HttpResponseRedirect('/imagr/profile/{}'.format(followed_user.id))
+                except:
+                    print 'raised an error'
+                    return HttpResponseRedirect('/imagr/profile/{}'.format(user_id))
+        else:
+            return HttpResponseRedirect('/imagr/profile/{}'.format(user_id))
+    else:
+        return HttpResponse('Access Denied')
 
 def stream(request):
-    recent_photos = Photo.objects.order_by('date_published')[:10]
+    logged_in_user = request.user
+    following_list = request.user.following.all()
+    picturelist = []
+    for publisher in following_list:
+        picturelist += Photo.objects.filter(Q(owner=publisher, published ='shared') | Q(owner = publisher, published= 'public')).order_by('date_published')[:10]
+        # print Photo.objects.filter(owner_id=publisher.id)
+        print publisher.id
+    print len(picturelist)
+    for picture in picturelist:
+        print picture.published
+    picturelist.reverse()
+    for picture in picturelist:
+        owner = picture.owner
+        if logged_in_user not in owner.following.all() and picture.published == 'shared':
+            picturelist.remove(picture)
+
+
     template = loader.get_template('imagr/stream.html')
+    print len(picturelist)
     context = RequestContext(request, {
-        'recent_photos': recent_photos
+        'picturelist': picturelist,
+        'logged_in_user': logged_in_user
         })
     return HttpResponse(template.render(context))
 
+def set_cover(request, album_id, photo_id):
+    logged_in_user = request.user
+    photo = Photo.objects.get(pk=photo_id)
+    album = Album.objects.get(pk=album_id)
+    album.cover = photo
+    album.save()
+    print album.cover
+    
+    print photo.title
+    
+    return HttpResponseRedirect('/imagr/album/{}'.format(album_id))

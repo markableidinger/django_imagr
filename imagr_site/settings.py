@@ -71,10 +71,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'imagr_db',
-        # 'USER': 'admin',
-        # 'PASSWORD': 'password',
-        # 'HOST': 'localhost',
-        # 'PORT': '55432',
+        'USER': 'admin',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',
+        'PORT': '55432',
     }
 }
 
@@ -97,3 +97,4 @@ AUTH_USER_MODEL = 'imagr.Imagr_User'
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = '/imagr/templates/static/'
