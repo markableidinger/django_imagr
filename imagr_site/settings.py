@@ -11,9 +11,9 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import django
 import os
-import mailgun
-mailgun.set_mailgun_credentials()
-
+import env_settings
+env_settings.set_mailgun_credentials()
+env_settings.set_secret_key()
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 EMAIL_HOST_USER = os.environ['Default SMTP Login']
@@ -26,14 +26,17 @@ EMAIL_SMTP = True
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'keh%rh77fe=)netnf$fx48*2(-+!d0e0)+afl=bzfb32$=r&nz'
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 LOGIN_REDIRECT_URL = '/imagr/profile'
-TEMPLATE_DEBUG = True
+TEMPLATE_DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.halosrd.com',
+                '.markableidinger.com',
+                'localhost'
+                ]
 
 TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'templates')]
 # Application definition

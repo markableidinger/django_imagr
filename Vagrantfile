@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-$postgresSetup = <<EOL
+postgresSetup = """
 apt-get update
 apt-get install --assume-yes postgresql postgresql-contrib
 sudo -u postgres createdb imagr_db 
@@ -12,7 +12,7 @@ EOS
 echo "host all all 0.0.0.0/0 password" >> /etc/postgresql/9.1/main/pg_hba.conf
 echo "listen_addresses = '*'" >> /etc/postgresql/9.1/main/postgresql.conf
 service postgresql restart
-EOL
+"""
 
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
