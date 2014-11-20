@@ -33,10 +33,10 @@ DEBUG = False
 LOGIN_REDIRECT_URL = '/imagr/profile'
 TEMPLATE_DEBUG = False
 
-ALLOWED_HOSTS = ['.halosrd.com',
-                '.markableidinger.com',
+ALLOWED_HOSTS = ['imagr.halosrd.com',
+                'imagr.markableidinger.com',
                 'localhost',
-                '*.us-west-2.compute.amazonaws.com'
+                '*',
                 ]
 
 TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'templates')]
