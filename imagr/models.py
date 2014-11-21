@@ -77,6 +77,7 @@ class Album(models.Model):
     date_uploaded = models.DateTimeField('Date Uploaded')
     date_modified = models.DateTimeField('Date Modified')
     date_published = models.DateTimeField('Date Published')
+    has_cover = models.BooleanField(default = False)
     title = models.CharField(max_length=60)
     published = models.CharField(PUBLISH_OPTIONS, max_length=7, default='private')
     cover = models.ForeignKey(Photo, related_name='cover', blank=True, null=True)

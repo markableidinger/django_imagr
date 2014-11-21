@@ -208,9 +208,6 @@ def set_cover(request, album_id, photo_id):
     photo = Photo.objects.get(pk=photo_id)
     album = Album.objects.get(pk=album_id)
     album.cover = photo
+    album.has_cover = True
     album.save()
-    print album.cover
-    
-    print photo.title
-    
     return HttpResponseRedirect('/imagr/album/{}'.format(album_id))

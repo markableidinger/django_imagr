@@ -22,7 +22,10 @@
 {% if album_list %}
     <ul>
     {% for album in album_list %}
-        <a href= '{% url "imagr:album" album.id %}'><li>{{album.title}}</li><img class='cover-image' src='{% url "imagr:photo_redirect" album.cover.id %}'></a>
+        <a href= '{% url "imagr:album" album.id %}'><li>{{album.title}}</li></a>
+        {% if album.has_cover %}
+        <img class='cover-image' src='{% url "imagr:photo_redirect" album.cover.id %}'>
+        {% endif %}
     {% endfor %}
     </ul>
 {% else %}
